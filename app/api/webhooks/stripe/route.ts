@@ -67,39 +67,132 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           const { data: paymentEmail, error: paymentError } = await resend.emails.send({
             from: process.env.FROM_EMAIL || 'Integrity Clean Solutions <info@pay.integritycleansolutions.com>',
             to: [customerEmail],
-            subject: '✅ Pago Confirmado - Fascinante Digital',
+            subject: 'Pago Confirmado - Integrity Clean Solutions',
             html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #059669;">✅ ¡Pago Confirmado!</h2>
-                <p>Hola <strong>${customerName}</strong>,</p>
-                <p>¡Excelente! Hemos recibido tu pago y tu servicio ha sido confirmado.</p>
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              </head>
+              <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+                <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td align="center" style="padding: 40px 20px;">
+                      <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <!-- Header -->
+                        <tr>
+                          <td style="padding: 40px 40px 30px; text-align: center; border-bottom: 3px solid #059669;">
+                            <h1 style="margin: 0; color: #059669; font-size: 28px; font-weight: 600;">Pago Confirmado</h1>
+                          </td>
+                        </tr>
+                        
+                        <!-- Main Content -->
+                        <tr>
+                          <td style="padding: 40px;">
+                            <p style="margin: 0 0 20px; color: #333333; font-size: 16px; line-height: 1.6;">
+                              Estimado/a <strong style="color: #059669;">${customerName}</strong>,
+                            </p>
+                            
+                            <p style="margin: 0 0 30px; color: #333333; font-size: 16px; line-height: 1.6;">
+                              Gracias por confiar en Integrity Clean Solutions. Hemos recibido su pago y su servicio ha sido confirmado exitosamente.
+                            </p>
 
-                <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
-                  <h3 style="color: #059669; margin-top: 0;">💳 Detalles del Pago:</h3>
-                  <p><strong>ID de Transacción:</strong> ${session.id}</p>
-                  <p><strong>Monto Pagado:</strong> $${(parseInt(customPrice) / 100).toFixed(2)}</p>
-                  <p><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES')}</p>
-                  <p><strong>Estado:</strong> ✅ Confirmado</p>
-                </div>
+                            <!-- Payment Details -->
+                            <table role="presentation" style="width: 100%; margin-bottom: 30px; background-color: #f0fdf4; border-radius: 6px; border-left: 4px solid #059669;">
+                              <tr>
+                                <td style="padding: 20px;">
+                                  <h3 style="margin: 0 0 15px; color: #059669; font-size: 18px; font-weight: 600;">Detalles del Pago</h3>
+                                  <table role="presentation" style="width: 100%;">
+                                    <tr>
+                                      <td style="padding: 8px 0; color: #666666; font-size: 14px;">ID de Transacción:</td>
+                                      <td style="padding: 8px 0; text-align: right; color: #333333; font-size: 14px; font-family: monospace;">${session.id.substring(0, 20)}...</td>
+                                    </tr>
+                                    <tr>
+                                      <td style="padding: 8px 0; color: #666666; font-size: 14px;">Monto Pagado:</td>
+                                      <td style="padding: 8px 0; text-align: right; color: #059669; font-size: 16px; font-weight: 600;">$${(parseInt(customPrice) / 100).toFixed(2)}</td>
+                                    </tr>
+                                    <tr>
+                                      <td style="padding: 8px 0; color: #666666; font-size: 14px;">Fecha de Pago:</td>
+                                      <td style="padding: 8px 0; text-align: right; color: #333333; font-size: 14px;">${new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                                    </tr>
+                                    <tr>
+                                      <td style="padding: 8px 0; color: #666666; font-size: 14px;">Estado:</td>
+                                      <td style="padding: 8px 0; text-align: right; color: #059669; font-size: 14px; font-weight: 600;">Confirmado</td>
+                                    </tr>
+                                  </table>
+                                </td>
+                              </tr>
+                            </table>
 
-                ${quoteData.propertySize ? `
-                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                  <h3 style="color: #2563eb; margin-top: 0;">🏠 Detalles del Servicio:</h3>
-                  <p><strong>Propiedad:</strong> ${quoteData.propertySize} sq ft, ${quoteData.bedrooms} habitaciones, ${quoteData.bathrooms} baños</p>
-                  ${quoteData.frequency ? `<p><strong>Frecuencia:</strong> ${quoteData.frequency}</p>` : ''}
-                  ${quoteData.extras && quoteData.extras.length > 0 ? `<p><strong>Servicios Adicionales:</strong> ${quoteData.extras.join(', ')}</p>` : ''}
-                </div>
-                ` : ''}
+                            ${quoteData.propertySize ? `
+                            <!-- Service Details -->
+                            <table role="presentation" style="width: 100%; margin-bottom: 30px; background-color: #f8f9fa; border-radius: 6px;">
+                              <tr>
+                                <td style="padding: 20px;">
+                                  <h3 style="margin: 0 0 15px; color: #2563eb; font-size: 18px; font-weight: 600;">Detalles del Servicio</h3>
+                                  <p style="margin: 0 0 10px; color: #333333; font-size: 14px; line-height: 1.6;">
+                                    <strong>Propiedad:</strong> ${quoteData.propertySize} sq ft, ${quoteData.bedrooms} habitaciones, ${quoteData.bathrooms} baños
+                                  </p>
+                                  ${quoteData.frequency ? `<p style="margin: 0 0 10px; color: #333333; font-size: 14px; line-height: 1.6;"><strong>Frecuencia:</strong> ${quoteData.frequency}</p>` : ''}
+                                  ${quoteData.extras && quoteData.extras.length > 0 ? `<p style="margin: 0; color: #333333; font-size: 14px; line-height: 1.6;"><strong>Servicios Adicionales:</strong> ${quoteData.extras.join(', ')}</p>` : ''}
+                                </td>
+                              </tr>
+                            </table>
+                            ` : ''}
 
-                <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
-                  <h3 style="color: #f59e0b; margin-top: 0;">📞 Próximos Pasos:</h3>
-                  <ul style="color: #f59e0b;">
-                    <li>Nuestro equipo se pondrá en contacto contigo en las próximas 24 horas</li>
-                    <li>Coordinaremos la fecha y hora de tu servicio</li>
-                    <li>Te enviaremos recordatorios antes del servicio</li>
-                  </ul>
-                </div>
-              </div>
+                            <!-- Next Steps -->
+                            <table role="presentation" style="width: 100%; margin-bottom: 30px; background-color: #fef3c7; border-radius: 6px; border-left: 4px solid #f59e0b;">
+                              <tr>
+                                <td style="padding: 20px;">
+                                  <h3 style="margin: 0 0 15px; color: #f59e0b; font-size: 18px; font-weight: 600;">Próximos Pasos</h3>
+                                  <ul style="margin: 0; padding-left: 20px; color: #92400e; font-size: 14px; line-height: 1.8;">
+                                    <li style="margin-bottom: 8px;">Nuestro equipo se pondrá en contacto con usted en las próximas 24 horas para coordinar los detalles</li>
+                                    <li style="margin-bottom: 8px;">Confirmaremos la fecha y hora del servicio según su preferencia</li>
+                                    <li>Recibirá un recordatorio 24 horas antes de la cita programada</li>
+                                  </ul>
+                                </td>
+                              </tr>
+                            </table>
+
+                            <!-- Professional Footer -->
+                            <table role="presentation" style="width: 100%; margin-top: 40px; padding-top: 30px; border-top: 1px solid #e5e7eb;">
+                              <tr>
+                                <td style="text-align: center; padding-bottom: 20px;">
+                                  <p style="margin: 0 0 10px; color: #059669; font-size: 20px; font-weight: 600;">Integrity Clean Solutions</p>
+                                  <p style="margin: 0 0 5px; color: #666666; font-size: 14px;">Servicios de Limpieza Profesional</p>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style="text-align: center; padding: 20px 0;">
+                                  <p style="margin: 0 0 8px; color: #999999; font-size: 12px; line-height: 1.6;">
+                                    Si tiene alguna pregunta sobre su servicio, no dude en contactarnos.
+                                  </p>
+                                  <p style="margin: 0; color: #999999; font-size: 12px;">
+                                    <strong style="color: #666666;">Email:</strong> info@integritycleansolutions.com
+                                  </p>
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <!-- Bottom Spacing -->
+                      <table role="presentation" style="width: 100%; margin-top: 20px;">
+                        <tr>
+                          <td style="text-align: center; padding: 20px;">
+                            <p style="margin: 0; color: #999999; font-size: 11px;">
+                              Este es un correo automático. Por favor, no responda a este mensaje.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </body>
+              </html>
             `,
           });
 
