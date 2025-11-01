@@ -28,7 +28,7 @@ export default function StripeServiceButton({
       setError('Por favor completa todos los campos');
       return;
     }
-    
+
     setError('');
 
     setLoading(true);

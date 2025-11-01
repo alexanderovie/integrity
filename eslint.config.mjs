@@ -1,6 +1,6 @@
+import { FlatCompat } from '@eslint/eslintrc';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { FlatCompat } from '@eslint/eslintrc';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -24,12 +24,12 @@ const eslintConfig = [
       ],
       '@typescript-eslint/explicit-function-return-type': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'error',
-      
+
       // Reglas estrictas de React
       'react-hooks/exhaustive-deps': 'error',
       'react/no-unescaped-entities': 'error',
       'react/jsx-no-target-blank': 'error',
-      
+
       // Reglas estrictas generales
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-debugger': 'error',
@@ -42,7 +42,7 @@ const eslintConfig = [
       'no-throw-literal': 'error',
       'no-return-await': 'error',
       'require-await': 'error',
-      
+
       // Reglas de importación
       'no-duplicate-imports': 'error',
       'no-useless-rename': 'error',
@@ -51,4 +51,3 @@ const eslintConfig = [
 ];
 
 export default eslintConfig;
-

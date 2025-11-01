@@ -22,7 +22,7 @@ export default function StripeCheckoutButton({
       setError('Por favor completa todos los campos');
       return;
     }
-    
+
     setError('');
 
     setLoading(true);

@@ -65,7 +65,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           const resend = getResend();
 
           const { data: paymentEmail, error: paymentError } = await resend.emails.send({
-            from: process.env.FROM_EMAIL || 'Fascinante Digital <info@fascinantedigital.com>',
+            from: process.env.FROM_EMAIL || 'Integrity Clean Solutions <info@pay.integritycleansolutions.com>',
             to: [customerEmail],
             subject: '✅ Pago Confirmado - Fascinante Digital',
             html: `

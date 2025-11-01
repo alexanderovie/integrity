@@ -3,6 +3,8 @@ import Stripe from 'stripe';
 // Configuración del cliente Stripe para el servidor
 // No especificamos apiVersion para usar la versión pinneada del SDK automáticamente
 // Esto garantiza compatibilidad con stripe@19.2.0
+let stripeInstance: Stripe | null = null;
+
 const getStripeSecretKey = (): string => {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) {
@@ -11,9 +13,18 @@ const getStripeSecretKey = (): string => {
   return key;
 };
 
-export const stripe = new Stripe(getStripeSecretKey(), {
-  typescript: true,
-});
+// Inicialización lazy - solo se inicializa cuando se usa (evita errores en build de Vercel)
+export const getStripeInstance = (): Stripe => {
+  if (!stripeInstance) {
+    stripeInstance = new Stripe(getStripeSecretKey(), {
+      typescript: true,
+    });
+  }
+  return stripeInstance;
+};
+
+// Exportar stripe para compatibilidad (solo se inicializa cuando se importa y usa)
+export const stripe = getStripeInstance();
 
 // Configuración de Stripe para el cliente
 export const getStripe = async (): Promise<ReturnType<typeof import('@stripe/stripe-js').loadStripe> | null> => {
