@@ -86,14 +86,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                             <h1 style="margin: 0; color: #059669; font-size: 28px; font-weight: 600;">Pago Confirmado</h1>
                           </td>
                         </tr>
-                        
+
                         <!-- Main Content -->
                         <tr>
                           <td style="padding: 40px;">
                             <p style="margin: 0 0 20px; color: #333333; font-size: 16px; line-height: 1.6;">
                               Estimado/a <strong style="color: #059669;">${customerName}</strong>,
                             </p>
-                            
+
                             <p style="margin: 0 0 30px; color: #333333; font-size: 16px; line-height: 1.6;">
                               Gracias por confiar en Integrity Clean Solutions. Hemos recibido su pago y su servicio ha sido confirmado exitosamente.
                             </p>
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                           </td>
                         </tr>
                       </table>
-                      
+
                       <!-- Bottom Spacing -->
                       <table role="presentation" style="width: 100%; margin-top: 20px;">
                         <tr>
@@ -212,24 +212,109 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       try {
         const resend = getResend();
         const { data: teamEmail, error: teamError } = await resend.emails.send({
-          from: process.env.FROM_EMAIL || 'Fascinante Digital <info@fascinantedigital.com>',
-          to: [process.env.TO_EMAIL || 'info@fascinantedigital.com'],
-          subject: '💰 Pago Recibido - Fascinante Digital',
+          from: process.env.FROM_EMAIL || 'Integrity Clean Solutions <info@pay.integritycleansolutions.com>',
+          to: [process.env.TO_EMAIL || 'info@integritycleansolutions.com'],
+          subject: 'Nuevo Pago Recibido - Integrity Clean Solutions',
           html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h2 style="color: #059669;">💰 ¡Nuevo Pago Recibido!</h2>
-              <p>Se ha procesado un pago exitoso en el sitio web.</p>
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+              <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td align="center" style="padding: 40px 20px;">
+                    <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                      <!-- Header -->
+                      <tr>
+                        <td style="padding: 40px 40px 30px; text-align: center; border-bottom: 3px solid #059669;">
+                          <h1 style="margin: 0; color: #059669; font-size: 28px; font-weight: 600;">Nuevo Pago Recibido</h1>
+                        </td>
+                      </tr>
+                      
+                      <!-- Main Content -->
+                      <tr>
+                        <td style="padding: 40px;">
+                          <p style="margin: 0 0 30px; color: #333333; font-size: 16px; line-height: 1.6;">
+                            Se ha procesado un pago exitoso en el sistema de pagos.
+                          </p>
 
-              <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
-                <h3 style="color: #059669; margin-top: 0;">💳 Información del Pago:</h3>
-                <p><strong>ID de Transacción:</strong> ${session.id}</p>
-                <p><strong>Cliente:</strong> ${session.metadata?.customerName || 'N/A'}</p>
-                <p><strong>Email:</strong> ${session.customer_email || 'N/A'}</p>
-                <p><strong>Monto:</strong> $${session.metadata?.customPrice ? (parseInt(session.metadata.customPrice) / 100).toFixed(2) : 'N/A'}</p>
-                <p><strong>Servicio:</strong> ${session.metadata?.serviceId || 'N/A'}</p>
-                <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES')}</p>
-              </div>
-            </div>
+                          <!-- Payment Information -->
+                          <table role="presentation" style="width: 100%; margin-bottom: 30px; background-color: #f0fdf4; border-radius: 6px; border-left: 4px solid #059669;">
+                            <tr>
+                              <td style="padding: 20px;">
+                                <h3 style="margin: 0 0 15px; color: #059669; font-size: 18px; font-weight: 600;">Información del Pago</h3>
+                                <table role="presentation" style="width: 100%;">
+                                  <tr>
+                                    <td style="padding: 8px 0; color: #666666; font-size: 14px;">ID de Transacción:</td>
+                                    <td style="padding: 8px 0; text-align: right; color: #333333; font-size: 14px; font-family: monospace;">${session.id.substring(0, 25)}...</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="padding: 8px 0; color: #666666; font-size: 14px;">Cliente:</td>
+                                    <td style="padding: 8px 0; text-align: right; color: #333333; font-size: 14px; font-weight: 600;">${session.metadata?.customerName || 'N/A'}</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="padding: 8px 0; color: #666666; font-size: 14px;">Email del Cliente:</td>
+                                    <td style="padding: 8px 0; text-align: right; color: #333333; font-size: 14px;">${session.customer_email || 'N/A'}</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="padding: 8px 0; color: #666666; font-size: 14px;">Monto:</td>
+                                    <td style="padding: 8px 0; text-align: right; color: #059669; font-size: 16px; font-weight: 600;">$${session.metadata?.customPrice ? (parseInt(session.metadata.customPrice) / 100).toFixed(2) : 'N/A'}</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="padding: 8px 0; color: #666666; font-size: 14px;">Servicio:</td>
+                                    <td style="padding: 8px 0; text-align: right; color: #333333; font-size: 14px;">${session.metadata?.serviceId || 'N/A'}</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="padding: 8px 0; color: #666666; font-size: 14px;">Fecha y Hora:</td>
+                                    <td style="padding: 8px 0; text-align: right; color: #333333; font-size: 14px;">${new Date().toLocaleString('es-ES', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+
+                          <!-- Action Items -->
+                          <table role="presentation" style="width: 100%; margin-bottom: 30px; background-color: #f0f9ff; border-radius: 6px; border-left: 4px solid #0369a1;">
+                            <tr>
+                              <td style="padding: 20px;">
+                                <h3 style="margin: 0 0 15px; color: #0369a1; font-size: 18px; font-weight: 600;">Acciones Requeridas</h3>
+                                <ul style="margin: 0; padding-left: 20px; color: #1e40af; font-size: 14px; line-height: 1.8;">
+                                  <li style="margin-bottom: 8px;">Contactar al cliente para coordinar el servicio</li>
+                                  <li style="margin-bottom: 8px;">Programar la fecha y hora del servicio</li>
+                                  <li style="margin-bottom: 8px;">Preparar equipo y suministros necesarios</li>
+                                  <li>Enviar recordatorio 24 horas antes del servicio</li>
+                                </ul>
+                              </td>
+                            </tr>
+                          </table>
+
+                          <!-- Professional Footer -->
+                          <table role="presentation" style="width: 100%; margin-top: 40px; padding-top: 30px; border-top: 1px solid #e5e7eb;">
+                            <tr>
+                              <td style="text-align: center; padding-bottom: 20px;">
+                                <p style="margin: 0 0 10px; color: #059669; font-size: 20px; font-weight: 600;">Integrity Clean Solutions</p>
+                                <p style="margin: 0 0 5px; color: #666666; font-size: 14px;">Sistema de Notificaciones Automáticas</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="text-align: center; padding: 20px 0;">
+                                <p style="margin: 0; color: #999999; font-size: 12px;">
+                                  Este es un correo automático generado por el sistema de pagos.
+                                </p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
           `,
         });
 
