@@ -27,6 +27,9 @@ importers:
         specifier: ^19.1.0
         version: 19.2.0(@types/node@20.19.24)
     devDependencies:
+      '@eslint/eslintrc':
+        specifier: ^3.3.1
+        version: 3.3.1
       '@tailwindcss/postcss':
         specifier: ^4.1.16
         version: 4.1.16

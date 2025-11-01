@@ -16,17 +16,20 @@ interface StripeServiceButtonProps {
 export default function StripeServiceButton({
   service,
   className = ''
-}: StripeServiceButtonProps) {
+}: StripeServiceButtonProps): React.ReactElement {
   const [loading, setLoading] = useState(false);
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [error, setError] = useState<string>('');
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (): Promise<void> => {
     if (!customerEmail || !customerName) {
-      alert('Por favor completa todos los campos');
+      setError('Por favor completa todos los campos');
       return;
     }
+    
+    setError('');
 
     setLoading(true);
 
@@ -59,8 +62,9 @@ export default function StripeServiceButton({
         window.location.href = url;
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error:', error);
-      alert('Error al procesar el pago. Por favor intenta de nuevo.');
+      setError(`Error al procesar el pago: ${errorMessage}. Por favor intenta de nuevo.`);
     } finally {
       setLoading(false);
     }
@@ -79,6 +83,11 @@ export default function StripeServiceButton({
 
   return (
     <div className={`space-y-4 ${className}`}>
+      {error && (
+        <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
       <div className="space-y-3">
         <h4 className="text-white font-semibold text-lg">Reservar {service.service_title}</h4>
         <p className="text-white/80 text-sm">${service.price}.00 - {service.description.substring(0, 100)}...</p>

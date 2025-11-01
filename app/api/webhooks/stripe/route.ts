@@ -3,9 +3,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import Stripe from 'stripe';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const getResend = (): Resend => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY is not set');
+  }
+  return new Resend(apiKey);
+};
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   const body = await request.text();
   const signature = request.headers.get('stripe-signature');
 
@@ -18,11 +24,20 @@ export async function POST(request: NextRequest) {
 
   let event: Stripe.Event;
 
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET is not set');
+    return NextResponse.json(
+      { error: 'Webhook secret not configured' },
+      { status: 500 }
+    );
+  }
+
   try {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      webhookSecret
     );
   } catch (err) {
     console.error('Webhook signature verification failed:', err);
@@ -34,20 +49,20 @@ export async function POST(request: NextRequest) {
 
   // Manejar diferentes tipos de eventos
   switch (event.type) {
-    case 'checkout.session.completed':
+    case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
-      console.log('💳 Payment successful:', session.id);
+      console.warn('💳 Payment successful:', session.id);
 
       // Enviar email de confirmación de pago
       try {
         const customerEmail = session.customer_email;
         const customerName = session.metadata?.customerName || 'Cliente';
-        const serviceId = session.metadata?.serviceId || 'servicio';
         const customPrice = session.metadata?.customPrice || '0';
         const quoteData = session.metadata?.quoteData ? JSON.parse(session.metadata.quoteData) : {};
 
         if (customerEmail) {
-          console.log('📧 Enviando email de confirmación de pago a:', customerEmail);
+          console.warn('📧 Enviando email de confirmación de pago a:', customerEmail);
+          const resend = getResend();
 
           const { data: paymentEmail, error: paymentError } = await resend.emails.send({
             from: process.env.FROM_EMAIL || 'Fascinante Digital <info@fascinantedigital.com>',
@@ -91,10 +106,10 @@ export async function POST(request: NextRequest) {
           if (paymentError) {
             console.error('❌ Error enviando email de confirmación de pago:', paymentError);
           } else {
-            console.log('✅ Email de confirmación de pago enviado:', paymentEmail?.id);
+            console.warn('✅ Email de confirmación de pago enviado:', paymentEmail?.id);
           }
         } else {
-          console.log('⚠️ No se encontró email del cliente en la sesión');
+          console.warn('⚠️ No se encontró email del cliente en la sesión');
         }
       } catch (emailError) {
         console.error('❌ Error en envío de email de confirmación:', emailError);
@@ -102,6 +117,7 @@ export async function POST(request: NextRequest) {
 
       // Enviar notificación al equipo sobre el pago
       try {
+        const resend = getResend();
         const { data: teamEmail, error: teamError } = await resend.emails.send({
           from: process.env.FROM_EMAIL || 'Fascinante Digital <info@fascinantedigital.com>',
           to: [process.env.TO_EMAIL || 'info@fascinantedigital.com'],
@@ -127,31 +143,35 @@ export async function POST(request: NextRequest) {
         if (teamError) {
           console.error('❌ Error enviando notificación de pago al equipo:', teamError);
         } else {
-          console.log('✅ Notificación de pago enviada al equipo:', teamEmail?.id);
+          console.warn('✅ Notificación de pago enviada al equipo:', teamEmail?.id);
         }
       } catch (teamEmailError) {
         console.error('❌ Error en notificación de pago al equipo:', teamEmailError);
       }
 
       break;
+    }
 
-    case 'payment_intent.succeeded':
+    case 'payment_intent.succeeded': {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      console.log('💳 Payment Intent succeeded:', paymentIntent.id);
+      console.warn('💳 Payment Intent succeeded:', paymentIntent.id);
       break;
+    }
 
-    case 'payment_intent.payment_failed':
+    case 'payment_intent.payment_failed': {
       const failedPayment = event.data.object as Stripe.PaymentIntent;
-      console.log('❌ Payment failed:', failedPayment.id);
+      console.warn('❌ Payment failed:', failedPayment.id);
       break;
+    }
 
-    case 'checkout.session.expired':
+    case 'checkout.session.expired': {
       const expiredSession = event.data.object as Stripe.Checkout.Session;
-      console.log('⏰ Checkout session expired:', expiredSession.id);
+      console.warn('⏰ Checkout session expired:', expiredSession.id);
       break;
+    }
 
     default:
-      console.log(`Unhandled event type: ${event.type}`);
+      console.warn(`Unhandled event type: ${event.type}`);
   }
 
   return NextResponse.json({ received: true });

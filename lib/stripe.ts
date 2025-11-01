@@ -3,15 +3,28 @@ import Stripe from 'stripe';
 // Configuración del cliente Stripe para el servidor
 // No especificamos apiVersion para usar la versión pinneada del SDK automáticamente
 // Esto garantiza compatibilidad con stripe@19.2.0
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const getStripeSecretKey = (): string => {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    throw new Error('STRIPE_SECRET_KEY is not set');
+  }
+  return key;
+};
+
+export const stripe = new Stripe(getStripeSecretKey(), {
   typescript: true,
 });
 
 // Configuración de Stripe para el cliente
-export const getStripe = () => {
+export const getStripe = async (): Promise<ReturnType<typeof import('@stripe/stripe-js').loadStripe> | null> => {
   if (typeof window !== 'undefined') {
-    const { loadStripe } = require('@stripe/stripe-js');
-    return loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+    const { loadStripe } = await import('@stripe/stripe-js');
+    const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+    if (!publishableKey) {
+      console.error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set');
+      return null;
+    }
+    return loadStripe(publishableKey);
   }
   return null;
 };

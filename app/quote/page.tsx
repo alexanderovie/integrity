@@ -40,7 +40,7 @@ interface QuoteFormData {
   comments: string;
 }
 
-function QuotePageContent() {
+function QuotePageContent(): React.ReactElement {
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState<QuoteFormData>({
     // Availability
@@ -98,7 +98,7 @@ function QuotePageContent() {
     }
   }, [searchParams]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
 
@@ -108,77 +108,91 @@ function QuotePageContent() {
     }
   };
 
-  const handleExtraChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      extras: checked
-        ? [...prev.extras, name]
-        : prev.extras.filter(extra => extra !== name)
-    }));
-  };
-
-  const validateForm = () => {
+  const validateForm = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     let firstErrorField = '';
 
     // Required fields validation (in order of appearance)
     if (!formData.zipCode.trim()) {
       newErrors.zipCode = 'ZIP code is required';
-      if (!firstErrorField) firstErrorField = 'zipCode';
+      if (!firstErrorField) {
+        firstErrorField = 'zipCode';
+      }
     }
     if (!formData.serviceType.trim()) {
       newErrors.serviceType = 'Service type is required';
-      if (!firstErrorField) firstErrorField = 'serviceType';
+      if (!firstErrorField) {
+        firstErrorField = 'serviceType';
+      }
     }
     if (!formData.bedrooms.trim()) {
       newErrors.bedrooms = 'Number of bedrooms is required';
-      if (!firstErrorField) firstErrorField = 'bedrooms';
+      if (!firstErrorField) {
+        firstErrorField = 'bedrooms';
+      }
     }
     if (!formData.bathrooms.trim()) {
       newErrors.bathrooms = 'Number of bathrooms is required';
-      if (!firstErrorField) firstErrorField = 'bathrooms';
+      if (!firstErrorField) {
+        firstErrorField = 'bathrooms';
+      }
     }
     if (!formData.propertySize.trim()) {
       newErrors.propertySize = 'Property size is required';
-      if (!firstErrorField) firstErrorField = 'propertySize';
+      if (!firstErrorField) {
+        firstErrorField = 'propertySize';
+      }
     }
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
-      if (!firstErrorField) firstErrorField = 'name';
+      if (!firstErrorField) {
+        firstErrorField = 'name';
+      }
     }
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
-      if (!firstErrorField) firstErrorField = 'email';
+      if (!firstErrorField) {
+        firstErrorField = 'email';
+      }
     }
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone is required';
-      if (!firstErrorField) firstErrorField = 'phone';
+      if (!firstErrorField) {
+        firstErrorField = 'phone';
+      }
     }
     if (!formData.address.trim()) {
       newErrors.address = 'Address is required';
-      if (!firstErrorField) firstErrorField = 'address';
+      if (!firstErrorField) {
+        firstErrorField = 'address';
+      }
     }
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.email && !emailRegex.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
-      if (!firstErrorField) firstErrorField = 'email';
+      if (!firstErrorField) {
+        firstErrorField = 'email';
+      }
     }
 
     // Phone validation (10 digits)
     const phoneRegex = /^\d{10}$/;
     if (formData.phone && !phoneRegex.test(formData.phone.replace(/\D/g, ''))) {
       newErrors.phone = 'Enter a valid 10-digit phone number';
-      if (!firstErrorField) firstErrorField = 'phone';
+      if (!firstErrorField) {
+        firstErrorField = 'phone';
+      }
     }
 
     // ZIP code validation
     const zipRegex = /^\d{5}$/;
     if (formData.zipCode && !zipRegex.test(formData.zipCode)) {
       newErrors.zipCode = 'Enter a valid 5-digit ZIP code';
-      if (!firstErrorField) firstErrorField = 'zipCode';
+      if (!firstErrorField) {
+        firstErrorField = 'zipCode';
+      }
     }
 
     setErrors(newErrors);
@@ -200,7 +214,7 @@ function QuotePageContent() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const getServiceId = (serviceName: string) => {
+  const getServiceId = (serviceName: string): string => {
     const serviceMap: { [key: string]: string } = {
       "Standard Clean": "regular-cleaning",
       "Deep Cleaning": "deep-cleaning",
@@ -213,7 +227,7 @@ function QuotePageContent() {
   };
 
   // Calcular precio basado en los datos del formulario
-  const calculatePrice = () => {
+  const calculatePrice = (): number => {
     let basePrice = 0;
     const propertySize = parseInt(formData.propertySize) || 0;
     const bedrooms = parseInt(formData.bedrooms) || 0;
@@ -284,7 +298,7 @@ function QuotePageContent() {
     return Math.max(totalPrice, 75);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -295,7 +309,6 @@ function QuotePageContent() {
 
     try {
       const calculatedPrice = calculatePrice();
-      console.log('Calculated price:', calculatedPrice);
 
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -329,7 +342,6 @@ function QuotePageContent() {
       }
 
       const { sessionId } = await response.json();
-      console.log('Session ID:', sessionId);
 
       const sessionResponse = await fetch(`/api/checkout-session/${sessionId}`);
 
@@ -338,12 +350,13 @@ function QuotePageContent() {
       }
 
       const { url } = await sessionResponse.json();
-      console.log('Checkout URL:', url);
 
       window.location.href = url;
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error:', error);
-      alert(`Error processing payment: ${error.message || 'Unknown error'}. Please try again.`);
+      // Usar un estado de error en lugar de alert para mejor UX
+      setErrors({ submit: `Error processing payment: ${errorMessage}. Please try again.` });
     } finally {
       setLoading(false);
     }
@@ -835,7 +848,7 @@ function QuotePageContent() {
   );
 }
 
-export default function QuotePage() {
+export default function QuotePage(): React.ReactElement {
   return (
     <Suspense fallback={<div>Loading quote...</div>}>
       <QuotePageContent />

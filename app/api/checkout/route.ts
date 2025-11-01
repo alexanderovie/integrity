@@ -1,11 +1,9 @@
 import { CLEANING_SERVICES, stripe } from '@/lib/stripe';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const { serviceId, customerEmail, customerName, customPrice, quoteData } = await request.json();
-
-    console.log('Checkout request:', { serviceId, customerEmail, customerName, customPrice, quoteData });
 
     // Validar que el servicio existe
     const service = CLEANING_SERVICES.find(s => s.id === serviceId);
@@ -22,8 +20,6 @@ export async function POST(request: NextRequest) {
     const serviceDescription = customPrice
       ? `Personalized cleaning service quote based on your property details`
       : service.description;
-
-    console.log('Using price:', finalPrice, 'cents ($' + (finalPrice / 100).toFixed(2) + ')');
 
     // Crear sesión de checkout
     const session = await stripe.checkout.sessions.create({
@@ -53,13 +49,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log('Session created:', session.id);
-
     return NextResponse.json({ sessionId: session.id });
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error creating checkout session:', error);
     return NextResponse.json(
-      { error: `Error interno del servidor: ${error.message}` },
+      { error: `Error interno del servidor: ${errorMessage}` },
       { status: 500 }
     );
   }

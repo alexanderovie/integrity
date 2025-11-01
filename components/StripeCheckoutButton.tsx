@@ -11,16 +11,19 @@ interface StripeCheckoutButtonProps {
 export default function StripeCheckoutButton({
   service,
   className = ''
-}: StripeCheckoutButtonProps) {
+}: StripeCheckoutButtonProps): React.ReactElement {
   const [loading, setLoading] = useState(false);
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerName, setCustomerName] = useState('');
+  const [error, setError] = useState<string>('');
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (): Promise<void> => {
     if (!customerEmail || !customerName) {
-      alert('Por favor completa todos los campos');
+      setError('Por favor completa todos los campos');
       return;
     }
+    
+    setError('');
 
     setLoading(true);
 
@@ -53,8 +56,9 @@ export default function StripeCheckoutButton({
         window.location.href = url;
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error:', error);
-      alert('Error al procesar el pago. Por favor intenta de nuevo.');
+      setError(`Error al procesar el pago: ${errorMessage}. Por favor intenta de nuevo.`);
     } finally {
       setLoading(false);
     }
@@ -62,6 +66,11 @@ export default function StripeCheckoutButton({
 
   return (
     <div className={`space-y-4 ${className}`}>
+      {error && (
+        <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
       <div className="space-y-2">
         <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">
           Nombre Completo
