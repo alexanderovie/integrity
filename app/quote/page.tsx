@@ -18,8 +18,8 @@ interface QuoteFormData {
   bathrooms: string;
   propertySize: string;
 
-  // Extras
-  extras: string[];
+  // Extras - ahora con cantidades
+  extras: { [key: string]: number };
 
   // Date and Time
   serviceDate: string;
@@ -57,8 +57,8 @@ function QuotePageContent(): React.ReactElement {
     bathrooms: '1',
     propertySize: '750',
 
-    // Extras
-    extras: [],
+    // Extras - objeto con cantidades
+    extras: {},
 
     // Date and Time
     serviceDate: '',
@@ -262,7 +262,7 @@ function QuotePageContent(): React.ReactElement {
       basePrice *= multiplier;
     }
 
-    // Extras
+    // Extras - calcular precio con cantidades
     const extrasPrices: { [key: string]: number } = {
       "interior_windows": 25,
       "blinds_cleaning": 30,
@@ -275,8 +275,10 @@ function QuotePageContent(): React.ReactElement {
     };
 
     let extrasTotal = 0;
-    formData.extras.forEach(extra => {
-      extrasTotal += extrasPrices[extra] || 0;
+    Object.entries(formData.extras).forEach(([extraKey, quantity]) => {
+      if (quantity > 0) {
+        extrasTotal += (extrasPrices[extraKey] || 0) * quantity;
+      }
     });
 
     // Aplicar propina si está seleccionada
@@ -554,34 +556,88 @@ function QuotePageContent(): React.ReactElement {
                       { key: "pet_hair_removal", label: "Pet Hair Removal", price: 20, icon: "🐕" },
                       { key: "heavy_duty", label: "Heavy Duty Clean", price: 50, icon: "💪" },
                       { key: "garage_cleaning", label: "Garage Cleaning", price: 40, icon: "🚗" }
-                    ].map(extra => (
-                      <div
-                        key={extra.key}
-                        className={`p-4 border rounded-lg cursor-pointer transition-colors ${formData.extras.includes(extra.key)
-                          ? 'border-promobar bg-promobar/10'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-promobar'
+                    ].map(extra => {
+                      const quantity = formData.extras[extra.key] || 0;
+                      const totalPrice = extra.price * quantity;
+                      
+                      return (
+                        <div
+                          key={extra.key}
+                          className={`p-4 border rounded-lg transition-colors ${
+                            quantity > 0
+                              ? 'border-promobar bg-promobar/10'
+                              : 'border-gray-300 dark:border-gray-600 hover:border-promobar'
                           }`}
-                        onClick={() => {
-                          const isSelected = formData.extras.includes(extra.key);
-                          setFormData(prev => ({
-                            ...prev,
-                            extras: isSelected
-                              ? prev.extras.filter(e => e !== extra.key)
-                              : [...prev.extras, extra.key]
-                          }));
-                        }}
-                      >
-                        <div className="text-center">
-                          <div className="text-2xl mb-2">{extra.icon}</div>
-                          <div className="text-sm font-medium text-secondary dark:text-white">
-                            {extra.label}
+                        >
+                          <div className="text-center mb-3">
+                            <div className="text-2xl mb-2">{extra.icon}</div>
+                            <div className="text-sm font-medium text-secondary dark:text-white mb-1">
+                              {extra.label}
+                            </div>
+                            <div className="text-promobar font-semibold text-xs">
+                              ${extra.price} each
+                            </div>
                           </div>
-                          <div className="text-promobar font-semibold">
-                            +${extra.price}
+                          
+                          {/* Stepper Controls */}
+                          <div className="flex items-center justify-center gap-2 mt-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  extras: {
+                                    ...prev.extras,
+                                    [extra.key]: Math.max(0, (prev.extras[extra.key] || 0) - 1)
+                                  }
+                                }));
+                              }}
+                              className="w-8 h-8 flex items-center justify-center rounded-md bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={quantity === 0}
+                              aria-label="Decrease quantity"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                              </svg>
+                            </button>
+                            
+                            <div className="min-w-[3rem] text-center">
+                              <span className="text-lg font-semibold text-secondary dark:text-white">
+                                {quantity}
+                              </span>
+                            </div>
+                            
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  extras: {
+                                    ...prev.extras,
+                                    [extra.key]: (prev.extras[extra.key] || 0) + 1
+                                  }
+                                }));
+                              }}
+                              className="w-8 h-8 flex items-center justify-center rounded-md bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                              aria-label="Increase quantity"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              </svg>
+                            </button>
                           </div>
+                          
+                          {/* Total Price Display */}
+                          {quantity > 0 && (
+                            <div className="mt-2 text-center">
+                              <div className="text-xs text-gray-600 dark:text-gray-400">
+                                Total: <span className="font-semibold text-promobar">${totalPrice}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -784,12 +840,14 @@ function QuotePageContent(): React.ReactElement {
                         <span className="text-secondary dark:text-white font-medium">{formData.propertySize} sq ft</span>
                       </div>
                     )}
-                    {formData.extras.length > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-secondary dark:text-white">Extras:</span>
-                        <span className="text-secondary dark:text-white font-medium">{formData.extras.length} selected</span>
-                      </div>
-                    )}
+                        {Object.values(formData.extras).some(qty => qty > 0) && (
+                          <div className="flex justify-between">
+                            <span className="text-secondary dark:text-white">Extras:</span>
+                            <span className="text-secondary dark:text-white font-medium">
+                              {Object.values(formData.extras).reduce((sum, qty) => sum + qty, 0)} items
+                            </span>
+                          </div>
+                        )}
                   </div>
 
                   <div className="border-t border-gray-300 dark:border-gray-600 pt-4">
