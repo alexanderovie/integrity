@@ -1,8 +1,9 @@
 import Stripe from 'stripe';
 
 // Configuración del cliente Stripe para el servidor
+// No especificamos apiVersion para usar la versión pinneada del SDK automáticamente
+// Esto garantiza compatibilidad con stripe@19.2.0
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-10-29.clover',
   typescript: true,
 });
 
