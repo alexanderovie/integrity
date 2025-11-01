@@ -4,17 +4,9 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 
-interface PaymentDetails {
-  amount: number;
-  customerEmail: string;
-  serviceName: string;
-  date: string;
-}
-
 function SuccessPageContent(): React.ReactElement {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
